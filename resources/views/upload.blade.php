@@ -79,13 +79,12 @@
         <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
             <!-- @csrf CSRF token -->
             <div class="form-group">
-                <select id="folderSelect" name="folder">
-                    <option value="">Select Folder</option>
-                    <!-- Generate options dynamically -->
+                <select id="topFolderSelect" name="folder">
+                    <option value="">Select Top-Level Folder</option>
                     <?php
                         // Sample array representing project hierarchy
                         $folders = [
-                            'file-uploading1' => [
+                            
                                 'restaurant_data' => [
                                     'menus',
                                     'images' => [
@@ -111,23 +110,24 @@
                                     'web_home_banner',
                                     'payeazy_offer_banner'
                                 ]
-                            ]
-                        ];
+                                ];
+                        
 
-                        // Function to recursively generate options
-                        function generateOptions($folders, $prefix = '') {
+                        // Function to generate top-level options
+                        function generateTopLevelOptions($folders) {
                             foreach ($folders as $folder => $subfolders) {
-                                $label = $prefix . $folder;
-                                echo '<option value="' . $label . '">' . $folder . '</option>';
-                                if (is_array($subfolders)) {
-                                    generateOptions($subfolders, $prefix . $folder . '/');
-                                }
+                                echo '<option value="' . $folder . '">' . ucfirst(str_replace('_', ' ', $folder)) . '</option>';
                             }
                         }
 
-                        // Generate options for dropdown
-                        generateOptions($folders);
+                        // Generate top-level options for dropdown
+                        generateTopLevelOptions($folders);
                     ?>
+                </select>
+            </div>
+            <div class="form-group" id="subFolderSelectWrapper" style="display: none;">
+                <select id="subFolderSelect" name="subfolder">
+                    <option value="">Select Subfolder</option>
                 </select>
             </div>
             <div class="form-group" id="fileInputWrapper" style="display: none;">
@@ -138,26 +138,57 @@
             <div class="progress" style="display: none;">
                 <div class="progress-bar" id="progressBar"></div> <!-- Progress bar -->
             </div>
-            <div class="message" id="uploadMessage"></div> <!-- Success/failure message -->
-        </form>
-    </div>
-    <script src="script.js"></script> <!-- Link to your JavaScript file -->
-    <script>
-        document.getElementById('folderSelect').addEventListener('change', function() {
-            var fileInputWrapper = document.getElementById('fileInputWrapper');
-            var uploadButton = document.getElementById('uploadButton');
-            var progressBar = document.querySelector('.progress');
-            // Show file input and upload button if a folder is selected
-            if (this.value !== '') {
+            <div class="message" id="uploadMessage"></div> <!-- Success/failure -->
+            <script>
+    // Function to populate subfolder dropdown based on the selected top-level folder
+    document.getElementById('topFolderSelect').addEventListener('change', function() {
+        var selectedFolder = this.value;
+        var subFolderSelect = document.getElementById('subFolderSelect');
+        var subFolderSelectWrapper = document.getElementById('subFolderSelectWrapper');
+        var fileInputWrapper = document.getElementById('fileInputWrapper');
+        var uploadButton = document.getElementById('uploadButton');
+        var progressBar = document.querySelector('.progress');
+
+        // Clear existing options
+        subFolderSelect.innerHTML = '<option value="">Select Subfolder</option>';
+
+        // If a top-level folder is selected
+        if (selectedFolder !== '') {
+            var subfolders = <?php echo json_encode($folders); ?>;
+            var selectedSubfolders = subfolders[selectedFolder];
+
+            // If the selected top-level folder has subfolders
+            if (selectedSubfolders && typeof selectedSubfolders === 'object') {
+                subFolderSelectWrapper.style.display = 'block';
+
+                // Generate and populate subfolder options
+                Object.keys(selectedSubfolders).forEach(function(subfolder) {
+                    var option = document.createElement('option');
+                    option.value = subfolder;
+                    option.textContent = subfolder.charAt(0).toUpperCase() + subfolder.slice(1).replace('_', ' ');
+                    subFolderSelect.appendChild(option);
+                });
+
+                // Show file input and upload button
                 fileInputWrapper.style.display = 'block';
                 uploadButton.style.display = 'block';
                 progressBar.style.display = 'block';
             } else {
+                // If no subfolders, hide subfolder dropdown and clear other elements
+                subFolderSelectWrapper.style.display = 'none';
                 fileInputWrapper.style.display = 'none';
                 uploadButton.style.display = 'none';
                 progressBar.style.display = 'none';
             }
-        });
-    </script>
-</body>
+        } else {
+            // If no top-level folder selected, hide all elements
+            subFolderSelectWrapper.style.display = 'none';
+            fileInputWrapper.style.display = 'none';
+            uploadButton.style.display = 'none';
+            progressBar.style.display = 'none';
+        }
+    });
+</script>
+
+        </body>
 </html>

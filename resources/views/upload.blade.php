@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>File Upload</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
+    <!-- <link rel="stylesheet" href="/Users/vedanthvasishth/file-uploader/public/css/app.css"> Link to your CSS file -->
     <style>
         /* Your CSS styles here */
         body {
@@ -84,18 +84,10 @@
                     <?php
                         // Sample array representing project hierarchy
                         $folders = [
-                            
                                 'restaurant_data' => [
                                     'menus',
-                                    'images' => [
-                                        'restaurant_logos',
-                                        'food_photos',
-                                        'ambiance_photos'
-                                    ],
-                                    'videos' => [
-                                        'chef_interviews',
-                                        'restaurant_tours'
-                                    ]
+                                    'images',
+                                    'videos' 
                                 ],
                                 'user_data' => [
                                     'profile_pictures',
@@ -111,23 +103,42 @@
                                     'payeazy_offer_banner'
                                 ]
                                 ];
-                        
 
-                        // Function to generate top-level options
-                        function generateTopLevelOptions($folders) {
-                            foreach ($folders as $folder => $subfolders) {
-                                echo '<option value="' . $folder . '">' . ucfirst(str_replace('_', ' ', $folder)) . '</option>';
-                            }
-                        }
-
-                        // Generate top-level options for dropdown
-                        generateTopLevelOptions($folders);
-                    ?>
+                                function generateSubfolderOptions($subfolders) {
+                                    foreach ($subfolders as $subfolder => $contents) {
+                                        if (is_array($contents)) {
+                                            // If the value is an array, recursively call the function
+                                            generateSubfolderOptions($contents);
+                                        } else {
+                                            // If it's a string (subfolder name), generate the option
+                                            echo '<option value="' . $contents . '">' . ucfirst(str_replace('_', ' ', $contents)) . '</option>';
+                                        }
+                                    }
+                                }
+                                
+                                // Function to generate top-level options
+                                function generateTopLevelOptions($folders) {
+                                    foreach ($folders as $folder => $subfolders) {
+                                        echo '<option value="' . $folder . '">' . ucfirst(str_replace('_', ' ', $folder)) . '</option>';
+                                    }
+                                }
+                                
+                                // Generate top-level options for dropdown
+                                generateTopLevelOptions($folders);
+                                // Call the recursive function to generate options for subfolders
+                                
+ 
+                                ?>
                 </select>
             </div>
             <div class="form-group" id="subFolderSelectWrapper" style="display: none;">
                 <select id="subFolderSelect" name="subfolder">
                     <option value="">Select Subfolder</option>
+                </select>
+            </div>
+            <div class="form-group" id="subSubFolderSelectWrapper" style="display: none;">
+                <select id="subSubFolderSelect" name="subsubfolder">
+                    <option value="">Select Sub-Subfolder</option>
                 </select>
             </div>
             <div class="form-group" id="fileInputWrapper" style="display: none;">
@@ -151,6 +162,9 @@
 
         // Clear existing options
         subFolderSelect.innerHTML = '<option value="">Select Subfolder</option>';
+        fileInputWrapper.style.display = 'none';
+        uploadButton.style.display = 'none';
+        progressBar.style.display = 'none';
 
         // If a top-level folder is selected
         if (selectedFolder !== '') {
@@ -164,31 +178,69 @@
                 // Generate and populate subfolder options
                 Object.keys(selectedSubfolders).forEach(function(subfolder) {
                     var option = document.createElement('option');
-                    option.value = subfolder;
-                    option.textContent = subfolder.charAt(0).toUpperCase() + subfolder.slice(1).replace('_', ' ');
+                    option.value = selectedSubfolders[subfolder];
+                    option.textContent = selectedSubfolders[subfolder].charAt(0).toUpperCase() + selectedSubfolders[subfolder].slice(1).replace('_', ' ');
                     subFolderSelect.appendChild(option);
                 });
 
-                // Show file input and upload button
-                fileInputWrapper.style.display = 'block';
-                uploadButton.style.display = 'block';
-                progressBar.style.display = 'block';
+                // Show subfolder dropdown
+                subFolderSelectWrapper.style.display = 'block';
             } else {
-                // If no subfolders, hide subfolder dropdown and clear other elements
+                // If no subfolders, hide subfolder dropdown
                 subFolderSelectWrapper.style.display = 'none';
-                fileInputWrapper.style.display = 'none';
-                uploadButton.style.display = 'none';
-                progressBar.style.display = 'none';
             }
         } else {
-            // If no top-level folder selected, hide all elements
+            // If no top-level folder selected, hide subfolder dropdown
             subFolderSelectWrapper.style.display = 'none';
-            fileInputWrapper.style.display = 'none';
-            uploadButton.style.display = 'none';
-            progressBar.style.display = 'none';
+        }
+    });
+
+    // Function to populate sub-subfolder dropdown based on the selected subfolder
+    document.getElementById('subFolderSelect').addEventListener('change', function() {
+        var selectedSubfolder = this.value;
+        var subSubFolderSelect = document.getElementById('subSubFolderSelect');
+        var subSubFolderSelectWrapper = document.getElementById('subSubFolderSelectWrapper');
+        var fileInputWrapper = document.getElementById('fileInputWrapper');
+        var uploadButton = document.getElementById('uploadButton');
+        var progressBar = document.querySelector('.progress');
+
+        // Clear existing options
+        subSubFolderSelect.innerHTML = '<option value="">Select Sub-Subfolder</option>';
+        fileInputWrapper.style.display = 'none';
+        uploadButton.style.display = 'none';
+        progressBar.style.display = 'none';
+
+        // If a subfolder is selected
+        if (selectedSubfolder !== '') {
+            var subfolders = <?php echo json_encode($folders); ?>;
+            var selectedSubfolders = subfolders[selectedSubfolder];
+
+            // If the selected subfolder has sub-subfolders
+            if (selectedSubfolders && typeof selectedSubfolders === 'object') {
+                subSubFolderSelectWrapper.style.display = 'block';
+
+                // Generate and populate sub-subfolder options
+                Object.keys(selectedSubfolders).forEach(function(subSubfolder) {
+                    var option = document.createElement('option');
+                    option.value = subSubfolder;
+                    option.textContent = subSubfolder.charAt(0).toUpperCase() + subSubfolder.slice(1).replace('_', ' ');
+                    subSubFolderSelect.appendChild(option);
+                });
+
+                // Show sub-subfolder dropdown
+                subSubFolderSelectWrapper.style.display = 'block';
+            } else {
+                // If no sub-subfolders, hide sub-subfolder dropdown
+                subSubFolderSelectWrapper.style.display = 'none';
+            }
+        } else {
+            // If no subfolder selected, hide sub-subfolder dropdown
+            subSubFolderSelectWrapper.style.display = 'none';
         }
     });
 </script>
 
-        </body>
+        </form>
+    </div>
+</body>
 </html>

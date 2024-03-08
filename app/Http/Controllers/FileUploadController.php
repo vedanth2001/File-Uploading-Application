@@ -27,15 +27,15 @@ class FileUploadController extends Controller
                 // Allow only video files (MP4, AVI, MOV) for the 'videos' subfolder
                 $rules['file'] .= '|mimes:mp4,avi,mov';
                 break;
-            case 'profile_pictures':
+            case 'profile pictures':
                 // Allow only image files for the 'profile_pictures' subfolder
                 $rules['file'] .= '|image';
                 break;
-            case 'uploaded_images':
+            case 'uploaded images':
                 // Allow only image files for the 'uploaded_images' subfolder
                 $rules['file'] .= '|image';
                 break;
-            case 'reservation_documents':
+            case 'reservation documents':
                 // Allow only PDF files for the 'reservation_documents' subfolder
                 $rules['file'] .= '|mimes:pdf';
                 break;
@@ -43,15 +43,15 @@ class FileUploadController extends Controller
                 // Allow only PDF files for the 'invoices' subfolder
                 $rules['file'] .= '|mimes:pdf';
                 break;
-            case 'app_home_banner':
+            case 'app home banner':
                 // Allow only image files for the 'app_home_banner' subfolder
                 $rules['file'] .= '|image';
                 break;
-            case 'web_home_banner':
+            case 'web home banner':
                 // Allow only image files for the 'web_home_banner' subfolder
                 $rules['file'] .= '|image';
                 break;
-            case 'payeazy_offer_banner':
+            case 'payeazy offer banner':
                 // Allow only image files for the 'payeazy_offer_banner' subfolder
                 $rules['file'] .= '|image';
                 break;
@@ -59,21 +59,22 @@ class FileUploadController extends Controller
         }
 
         $request->validate($rules);
-        $file=$request->file('file');
-        $directory = "file-uploading1/{$topFolder}/{$subFolder}";
-
+        $file = $request->file('file');
+        $directory = "{$topFolder}/{$subFolder}";
+        // dd($file);
         try {
             // Store the file on S3
-            $filePath = Storage::disk('s3')->putFile($directory, $file, 'public');
-
+            $filePath = Storage::disk('s3')->put($directory.'/'.$file->getClientOriginalName(), file_get_contents($file));
+        
             // Optionally, you can generate a URL to access the uploaded file
             $url = Storage::disk('s3')->url($filePath);
-
+        
             // Return a success response with the file URL
             return response()->json(['url' => $url], 200);
         } catch (\Exception $e) {
             // Handle any errors that occur during file upload
             return response()->json(['error' => $e->getMessage()], 500);
         }
+        
     }
 }

@@ -79,7 +79,8 @@
         <h1>File Upload</h1>
         <p>Visit the <a href="/">home page</a> to understand what kinds of files can be uploaded</p>
         <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
-            <!-- @csrf CSRF token -->
+        {{ csrf_field() }}
+            
             <input type="hidden" id="topFolderInput" name="topFolder">
             <input type="hidden" id="subFolderInput" name="subFolder">
             <div class="form-group">
@@ -88,23 +89,23 @@
                     <?php
                         // Sample array representing project hierarchy
                         $folders = [
-                                'restaurant_data' => [
+                                'Restaurant Data' => [
                                     'menus',
                                     'images',
                                     'videos' 
                                 ],
-                                'user_data' => [
-                                    'profile_pictures',
-                                    'uploaded_images'
+                                'User Data' => [
+                                    'profile pictures'
+                                    
                                 ],
-                                'booking_data' => [
-                                    'reservation_documents',
+                                'Booking Data' => [
+                                    'reservation documents',
                                     'invoices'
                                 ],
-                                'banners' => [
-                                    'app_home_banner',
-                                    'web_home_banner',
-                                    'payeazy_offer_banner'
+                                'Banners' => [
+                                    'app home banner',
+                                    'web home banner',
+                                    'payeazy offer banner'
                                 ]
                                 ];
 
@@ -155,51 +156,7 @@
             </div>
             <div class="message" id="uploadMessage"></div> <!-- Success/failure -->
             <script>
-    // Function to populate subfolder dropdown based on the selected top-level folder
-    // document.getElementById('topFolderSelect').addEventListener('change', function() {
-    //     var selectedFolder = this.value;
-    //     var subFolderSelect = document.getElementById('subFolderSelect');
-    //     var subFolderSelectWrapper = document.getElementById('subFolderSelectWrapper');
-    //     var fileInputWrapper = document.getElementById('fileInputWrapper');
-    //     var uploadButton = document.getElementById('uploadButton');
-    //     var progressBar = document.querySelector('.progress');
-    //     var topFolderInput = document.getElementById('topFolderInput');
-
-    //     // Clear existing options
-    //     subFolderSelect.innerHTML = '<option value="">Select Subfolder</option>';
-    //     fileInputWrapper.style.display = 'none';
-    //     uploadButton.style.display = 'none';
-    //     progressBar.style.display = 'none';
-
-    //     topFolderInput.value = selectedFolder;
-    //     // If a top-level folder is selected
-    //     if (selectedFolder !== '') {
-    //         var subfolders = <?php echo json_encode($folders); ?>;
-    //         var selectedSubfolders = subfolders[selectedFolder];
-
-    //         // If the selected top-level folder has subfolders
-    //         if (selectedSubfolders && typeof selectedSubfolders === 'object') {
-    //             subFolderSelectWrapper.style.display = 'block';
-
-    //             // Generate and populate subfolder options
-    //             Object.keys(selectedSubfolders).forEach(function(subfolder) {
-    //                 var option = document.createElement('option');
-    //                 option.value = selectedSubfolders[subfolder];
-    //                 option.textContent = selectedSubfolders[subfolder].charAt(0).toUpperCase() + selectedSubfolders[subfolder].slice(1).replace('_', ' ');
-    //                 subFolderSelect.appendChild(option);
-    //             });
-
-    //             // Show subfolder dropdown
-    //             subFolderSelectWrapper.style.display = 'block';
-    //         } else {
-    //             // If no subfolders, hide subfolder dropdown
-    //             subFolderSelectWrapper.style.display = 'none';
-    //         }
-    //     } else {
-    //         // If no top-level folder selected, hide subfolder dropdown
-    //         subFolderSelectWrapper.style.display = 'none';
-    //     }
-    // });
+    
     document.getElementById('topFolderSelect').addEventListener('change', function() {
         var selectedFolder = this.value;
         var subFolderSelect = document.getElementById('subFolderSelect');
@@ -290,6 +247,8 @@
             uploadButton.style.display = 'none';
             progressBar.style.display = 'none';
         }
+
+       
     });
 </script>
 
